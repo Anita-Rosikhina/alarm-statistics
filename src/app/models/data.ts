@@ -1,5 +1,7 @@
+import {EStatus} from "../enums/status";
+
 export interface IData {
-  statusType: string,
+  statusType: EStatus,
   tag: string,
   date: string,
 }
