@@ -4,6 +4,7 @@ import {DataService} from "./services/data.service";
 import {EStatus} from "./enums/status";
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import {IStatistic} from "./models/statistic";
 
 @Component({
   selector: 'app-root',
@@ -14,7 +15,7 @@ export class AppComponent implements OnInit {
   title = 'project';
   data: IData[] = [];
   tags: string[] = [];
-  statistic: any[] = [];
+  statistic: IStatistic[] = [];
 
   constructor(private dataService: DataService) {}
 
