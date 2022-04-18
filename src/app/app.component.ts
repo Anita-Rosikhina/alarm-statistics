@@ -1,10 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {IData} from "./models/data";
+import {IData, IRegion} from "./models/data";
 import {DataService} from "./services/data.service";
 import {EStatus} from "./enums/status";
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import {IStatistic} from "./models/statistic";
 
 @Component({
   selector: 'app-root',
@@ -12,10 +11,9 @@ import {IStatistic} from "./models/statistic";
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'project';
   data: IData[] = [];
   tags: string[] = [];
-  statistic: IStatistic[] = [];
+  statistic: IRegion[] = [];
 
   constructor(private dataService: DataService) {}
 
@@ -28,7 +26,8 @@ export class AppComponent implements OnInit {
   }
 
   generateTags(): void {
-    this.tags = this.data.map(el => el.tag);
+    this.tags = _.uniq(this.data.map(el => el.tag));
+    console.log(this.tags)
   }
 
   generateStatistics(): void {

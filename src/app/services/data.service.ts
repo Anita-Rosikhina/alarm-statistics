@@ -13,15 +13,14 @@ export class DataService {
 
   getData(): Observable<IData[]> {
     return this.httpClient.get('assets/data.txt', {responseType: 'text'})
-      .pipe(
-        map(data => data.split('\r\n\r\n')),
-        map(data => data.map(el => {
-          return {
-            statusType: el.includes('Відбій') ? EStatus.End : EStatus.Start,
-            date: el.slice(el.indexOf('[') + 1, el.indexOf(']')),
-            tag: el.slice(el.indexOf('#'))
-          }
-        })),
-      )
+      .pipe(map(data => this.convertTextToArray(data)));
+  }
+
+  convertTextToArray(data: string): IData[] {
+    return data.split('\r\n\r\n').map(el => ({
+      statusType: el.includes('Відбій') ? EStatus.End : EStatus.Start,
+      date: el.slice(el.indexOf('[') + 1, el.indexOf(']')),
+      tag: el.slice(el.indexOf('#'))
+    }));
   }
 }
