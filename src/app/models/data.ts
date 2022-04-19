@@ -3,23 +3,25 @@ import {EStatus} from "../enums/status";
 export interface IData {
   statusType: EStatus
   tag: string
+  fullDate: string
   date: string
 }
 
 export interface IRegion {
+  tag: string
   days: IDay[]
-  period: string
+  duration: number
   times: number
 }
 
 export interface IDay {
-  period: string
   times: number
-  alertPeriods: IAlert[]
+  duration: number
+  alerts: IAlert[]
 }
 
 export interface IAlert {
   startTime: string
   endTime: string
-  period: string
+  duration: number
 }

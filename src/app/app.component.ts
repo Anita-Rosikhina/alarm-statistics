@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
-import {IData, IRegion} from "./models/data";
+import {IAlert, IData, IDay, IRegion} from "./models/data";
 import {DataService} from "./services/data.service";
-import {EStatus} from "./enums/status";
 import * as _ from 'lodash';
 import * as moment from 'moment';
+import {EStatus} from "./enums/status";
 
 @Component({
   selector: 'app-root',
@@ -12,59 +12,64 @@ import * as moment from 'moment';
 })
 export class AppComponent implements OnInit {
   data: IData[] = [];
-  tags: string[] = [];
-  statistic: IRegion[] = [];
+  statistics: IRegion[] = [];
 
   constructor(private dataService: DataService) {}
 
   ngOnInit(): void {
     this.dataService.getData().subscribe((data: IData[]) => {
       this.data = data;
-      this.generateTags();
       this.generateStatistics();
     });
   }
 
-  generateTags(): void {
-    this.tags = _.uniq(this.data.map(el => el.tag));
-    console.log(this.tags)
+  private generateStatistics(): void {
+    const groupedArrayByTag = _.toArray(_.groupBy(this.data, 'tag'));
+    this.statistics = groupedArrayByTag.map(el => ({
+      tag: '',
+      days: this.generateDays(el),
+      duration: _.sumBy(this.generateDays(el), 'duration'),
+      times: Math.ceil(el.length / 2)
+    }))
+    console.log('statistics', this.statistics);
   }
 
-  generateStatistics(): void {
-    this.tags.forEach(tag => {
-      const filteredDataByTag = this.data.filter(el => el.tag === tag);
-      this.statistic = {
-        [tag]: {
-          times: this.data.filter(el => el.tag === tag && el.statusType === EStatus.Start).length,
-          duration: this.generalDuration(filteredDataByTag),
-          averageDuration: this.averageDuration(filteredDataByTag),
-        },
-        ...this.statistic
-      }
-    });
-    console.log(this.statistic)
+  private generateDays(data: IData[]): IDay[] {
+    return _.toArray(_.groupBy(data, 'date')).map(el => ({
+      times: Math.ceil(el.length / 2),
+      duration: this.calcDuration(el),
+      alerts: this.generateAlerts(el)
+    }));
   }
 
-  getDurations(alerts: IData[]) : number[] {
-    let endDate: string | null;
+  private calcDuration(data: IData[]): number {
     let durations: number[] = [];
-    _.forEachRight(alerts, alert => {
-      if (alert.statusType === EStatus.Start) {
-        const duration = moment(endDate)?.diff(alert.date, 'minutes');
-        durations = [...durations, duration]
-        endDate = null;
+    let startTime = '';
+    data.forEach(el => {
+      if (el.statusType === EStatus.End) {
+        durations.push(moment(el.fullDate).diff(moment(startTime), 'minutes', true));
+        startTime = ''
       } else {
-        endDate = alert.date
+        startTime = el.fullDate
       }
     })
-    return durations;
+    return _.sum(durations);
   }
 
-  generalDuration(alerts: IData[]): number {
-    return _.sum(this.getDurations(alerts));
-  }
-
-  averageDuration(alerts: IData[]): number {
-    return _.meanBy(this.getDurations(alerts), (d) => d);
+  private generateAlerts(data: IData[]): IAlert[] {
+    let alerts: IAlert[] = [];
+    let startTime = '';
+    data.forEach(el => {
+      if (el.statusType === EStatus.End) {
+        alerts.push({
+          startTime,
+          endTime: el.fullDate,
+          duration: moment(el.fullDate).diff(moment(startTime), 'minutes', true)
+        })
+      } else {
+        startTime = el.fullDate
+      }
+    })
+    return alerts;
   }
 }
