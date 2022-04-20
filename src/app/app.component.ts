@@ -26,12 +26,17 @@ export class AppComponent implements OnInit {
   private generateStatistics(): void {
     const groupedArrayByTag = _.toArray(_.groupBy(this.data, 'tag'));
     this.statistics = groupedArrayByTag.map(el => ({
-      tag: '',
+      tag: this.generateTag(el),
       days: this.generateDays(el),
       duration: _.sumBy(this.generateDays(el), 'duration'),
       times: Math.ceil(el.length / 2)
     }))
     console.log('statistics', this.statistics);
+  }
+
+  private generateTag(data:IData[]): string {
+    let tags = (_.groupBy(data, 'tag'))
+    return _.toString(Object.keys(tags))
   }
 
   private generateDays(data: IData[]): IDay[] {
