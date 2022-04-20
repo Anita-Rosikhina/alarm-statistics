@@ -34,9 +34,9 @@ export class AppComponent implements OnInit {
     console.log('statistics', this.statistics);
   }
 
-  private generateTag(data:IData[]): string {
-    let tags = (_.groupBy(data, 'tag'))
-    return _.toString(Object.keys(tags))
+  private generateTag(data: IData[]): string {
+    let tags = _.groupBy(data, 'tag')
+    return Object.keys(tags)[0]
   }
 
   private generateDays(data: IData[]): IDay[] {
